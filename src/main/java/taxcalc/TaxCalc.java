@@ -1,5 +1,4 @@
-return intString;
-        package taxcalc;
+package taxcalc;
 
 class TaxCalc {
 
