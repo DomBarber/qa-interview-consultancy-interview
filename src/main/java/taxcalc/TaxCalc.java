@@ -1,8 +1,5 @@
 package taxcalc;
 
-import java.util.Arrays;
-import java.util.List;
-
 class TaxCalc {
 
     int percent;
@@ -11,40 +8,36 @@ class TaxCalc {
         this.percent = percent;
     }
 
-    Pair<Integer, String> netAmount(Pair<Integer, String> first, Pair<Integer, String>... rest) {
+    @SafeVarargs
+    final Pair<Integer, String> netAmount(Pair<Integer, String>... pairs) {
 
-        List<Pair<Integer, String>> pairs = Arrays.asList(rest);
+        String currency = pairs[0].currency;
+        int totalAmount = 0;
 
-        Pair<Integer, String> total = first;
-
-        for (Pair<Integer, String> next : pairs) {
-            if (next.second != total.second) {
-                throw new ApplicationException();
+        for (Pair<Integer, String> pair : pairs) {
+            if (!pair.currency.equals(currency)) {
+                throw new ApplicationException("Currency type does not match");
             }
+            totalAmount = totalAmount + pair.amount;
+            System.out.println("Total Amount = " + totalAmount);
         }
 
-        for (Pair<Integer, String> next : pairs) {
-            total = new Pair<>(total.first + next.first, next.second);
-        }
+        double taxAmount = totalAmount * (percent / 100d);
+        Pair<Integer, String> tax = new Pair<>((int) taxAmount, currency);
 
-        Double amount = total.first * (percent / 100d);
-        Pair<Integer, String> tax = new Pair<>(amount.intValue(), first.second);
-
-        if (total.second == tax.second) {
-            return new Pair<>(total.first - tax.first, first.second);
-        } else {
-            throw new ApplicationException();
-        }
+        return new Pair<>(totalAmount - tax.amount, currency);
     }
 
     static class Pair<A, B> {
-        final A first;
-        final B second;
+        final A amount;
+        final B currency;
 
-        Pair(A first, B second) {
-            this.first = first;
-            this.second = second;
+        Pair(A amount, B currency) {
+            this.amount = amount;
+            this.currency = currency;
         }
-
     }
 }
+
+// In order for the calculator to stay relevant, I would be looking to support additional currency pairs as needed.
+// This appears to be the original intention by design due to the Pairs used with <Int, String>, allowing for the currency type to be specified.
